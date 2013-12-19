@@ -1,0 +1,20 @@
+{
+    "name": "markwilson/symfony2-validator-checksum",
+    "description": "Checksum constraint for Symfony2 validator component",
+    "require": {
+        "symfony/validator": "2.2.x"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Wilson",
+            "email": "mark@89allport.co.uk"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "MarkWilson\\": "lib/"
+        }
+    }
+}
