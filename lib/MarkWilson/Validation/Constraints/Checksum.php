@@ -46,6 +46,12 @@ class Checksum extends Constraint
      */
     public function __construct($options = null)
     {
+        if (isset($options['decoder'])) {
+            $this->decoderCallable = $options['decoder'];
+
+            unset($options['decoder']);
+        }
+
         parent::__construct($options);
 
         $validType = false;
