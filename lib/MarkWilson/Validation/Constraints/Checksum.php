@@ -14,6 +14,17 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 class Checksum extends Constraint
 {
     /**
+     * Value providers - default is inline
+     */
+    const CHECKSUM_TYPE_INLINE = 'inline';
+    const CHECKSUM_TYPE_ARRAY_KEY = 'array key';
+
+    /**
+     * Constraint types
+     */
+    const TYPE_MD5 = 'md5';
+
+    /**
      * Constraint message
      *
      * @var string
@@ -42,6 +53,20 @@ class Checksum extends Constraint
     public $decoderCallable;
 
     /**
+     * Checksum provider type - defaults to inline
+     *
+     * @var string
+     */
+    public $checksumType = self::CHECKSUM_TYPE_INLINE;
+
+    /**
+     * Data key if CHECKSUM_TYPE_ARRAY_KEY is used
+     *
+     * @var string
+     */
+    public $dataKey;
+
+    /**
      * {@inheritDoc}
      */
     public function __construct($options = null)
@@ -50,6 +75,18 @@ class Checksum extends Constraint
             $this->decoderCallable = $options['decoder'];
 
             unset($options['decoder']);
+        }
+
+        if (isset($options['checksum_type'])) {
+            $this->checksumType = $options['checksum_type'];
+
+            unset($options['checksum_type']);
+        }
+
+        if (isset($options['data_key'])) {
+            $this->dataKey = $options['data_key'];
+
+            unset($options['data_key']);
         }
 
         parent::__construct($options);
@@ -73,6 +110,14 @@ class Checksum extends Constraint
         if (null !== $this->decoderCallable && !is_callable($this->decoderCallable)) {
             throw new ConstraintDefinitionException('The option "decoder" must be a valid callable in constraint ' . __CLASS__ . '.');
         }
+
+        if ($this->checksumType !== self::CHECKSUM_TYPE_INLINE && $this->checksumType !== self::CHECKSUM_TYPE_ARRAY_KEY) {
+            throw new ConstraintDefinitionException('The option "checksum_type" is invalid in constraint ' . __CLASS__ . '.');
+        }
+
+        if ($this->checksumType === self::CHECKSUM_TYPE_ARRAY_KEY && (!isset($this->dataKey) || !is_string($this->dataKey))) {
+            throw new ConstraintDefinitionException('The option "data_key" is invalid in constraint ' . __CLASS__ . '.');
+        }
     }
 
     /**
@@ -92,7 +137,7 @@ class Checksum extends Constraint
     {
         $types = new \SplFixedArray(1);
 
-        $types[0] = 'md5';
+        $types[0] = self::TYPE_MD5;
 
         return $types;
     }

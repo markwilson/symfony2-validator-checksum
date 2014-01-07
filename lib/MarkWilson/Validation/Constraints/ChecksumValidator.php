@@ -25,6 +25,18 @@ class ChecksumValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint)
     {
+        switch ($constraint->checksumType) {
+            case Checksum::CHECKSUM_TYPE_INLINE:
+                $providedChecksum = $constraint->checksum;
+                break;
+            case Checksum::CHECKSUM_TYPE_ARRAY_KEY:
+                $providedChecksum = $value[$constraint->checksum];
+                $value = $value[$constraint->dataKey];
+                break;
+            default:
+                throw new \RuntimeException('Invalid checksum type provided');
+        }
+
         $decoder = $constraint->decoderCallable;
 
         if (null !== $decoder) {
@@ -32,14 +44,14 @@ class ChecksumValidator extends ConstraintValidator
         }
 
         switch ($constraint->type) {
-            case 'md5':
+            case Checksum::TYPE_MD5:
                 $checksum = md5($value);
                 break;
             default:
-                throw new \RuntimeException('Invalid checksum type provided');
+                throw new \RuntimeException('Invalid constraint type provided');
         }
 
-        if ($constraint->checksum !== $checksum) {
+        if ($providedChecksum !== $checksum) {
             $this->context->addViolation($constraint->message);
         }
     }
